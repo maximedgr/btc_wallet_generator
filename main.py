@@ -1,6 +1,7 @@
 ## Fichier de génération du wallet
 
 import secrets, hashlib
+import binascii, sys
 
 SEED_LENGTH = 128
 
@@ -51,13 +52,33 @@ seedChecksum = str(binarySeed)+str(fourBytes)
 print(seedChecksum)
 print(len(seedChecksum))
 
-
-tab = getSlice(seedChecksum)
-print('\n')
-print(tab)
+print('\n\n')
 
 
 
+def SeedToMnemonic(seedChecksum):
+    tab = getSlice(seedChecksum)
+    # print('\n Lots de 11 bits')
+    # print(tab)
+    intTab = []
+    for cell in tab:
+        intTab.append(int(cell, 2))
+
+    
+    wordlist = []
+    with open('bip-39Words.txt') as fin:
+
+        for cell in intTab:
+          
+            word = fin.readline(int(cell)).replace('\n', '')
+            wordlist.append(word)
+           
+        
+    return wordlist
+
+
+worldList = SeedToMnemonic(seedChecksum)
+print(worldList)
 
 
 
