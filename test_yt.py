@@ -58,8 +58,6 @@ def master_private(root_seed_bytes):
 
 a,b = master_private(bytes([int(i) for i in bin_result]))
 print("\nMaster Private key : ",end='')
-print(a)
-print(len(a))
+print(hex(int(a)))
 print("\nMaster Chain Code : ",end='')
-print(b)
-print(len(b))
+print(hex(int(b)))
