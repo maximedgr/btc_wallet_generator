@@ -24,7 +24,7 @@ def getMnemonicPhrase(bin_result, index_list):
 
 
 entropy_bytes = secrets.token_bytes(16)
-
+print('entropy: '+ str(entropy_bytes))
 hex_entropy = entropy_bytes.hex()
 print("\nHex_entropy : \n" + hex_entropy)
 
@@ -38,8 +38,8 @@ bin_result = (
     + bin(int(hashed_entropy, 16))[2:].zfill(BITS)[:4]
 )
 
-# print('\nBin result: ' + str(bin_result))
-print(len(bin_result))
+print('\nBin result: ' + str(bin_result))
+# print(len(bin_result))
 
 index_list = getFileWords()
 wordlist = getMnemonicPhrase(bin_result, index_list)
@@ -57,10 +57,10 @@ def master_private(root_seed_bytes):
 
 # print(int(bin_result))
 
-a,b = master_private(bytes([int(i) for i in bin_result]))
-print("\nMaster Private key : ",end='')
-print(a)
-print(len(a))
-print("\nMaster Chain Code : ",end='')
-print(b)
-print(len(b))
+# a,b = master_private(bytes([int(i) for i in bin_result]))
+# print("\nMaster Private key : ",end='')
+# print(a)
+# print(len(a))
+# print("\nMaster Chain Code : ",end='')
+# print(b)
+# print(len(b))

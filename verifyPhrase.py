@@ -2,7 +2,7 @@ import secrets, hashlib, binascii
 
 
 # Functions
-
+# Get the words from the bip39 file in a list
 def getFileWords():
     index_list = []
     with open("bip-39Words.txt", "r", encoding='utf-8') as file:
@@ -10,6 +10,7 @@ def getFileWords():
             index_list.append(word.strip())
     return index_list
 
+# Transform the words into a list of integers
 def wordToInt(phrase, index_list):
     intTab = []
     
@@ -21,6 +22,7 @@ def wordToInt(phrase, index_list):
 
     return intTab
 
+# Transform a list of integers into a binary result
 def intToBin(intPhrase):
     binPhrase = ''
     for n in intPhrase:
@@ -28,8 +30,8 @@ def intToBin(intPhrase):
 
     return binPhrase
 
-# test 
 
+# To check if we get the same word list as entered
 def verifyBinOutput(bin_result, index_list):
     wordlist = []
   
@@ -39,6 +41,42 @@ def verifyBinOutput(bin_result, index_list):
         wordInt = int(bin_result[index[0] : index[1]], 2)
         wordlist.append(index_list[wordInt])
     return wordlist
+
+# Split the binary phrase into a list of 8 bits numbers, then transform numbers into integers
+def binToInt(binPhraseWTChecksum):
+    intPhrase = []
+    for i in range(len(binPhraseWTChecksum) // 8):
+        index = [i*8, (i+1)*8]
+        fourBits = binPhraseWTChecksum[index[0] : index[1]]
+        intPhrase.append(int(fourBits, 2))
+    
+    return intPhrase
+
+# Get the binary phrase, then take the 128 first bits,
+# then call the above binToInt function,
+# then transform the integers into bytes,
+# then hash the bytes,
+# then get the last 4 bits (checksum) and compare with the phraseChecksum value
+def verifyChecksum(binPhrase):
+    phraseChecksum = binPhrase[-4:]
+
+    binPhraseWTChecksum = binPhrase[:-4]
+    int_phrase = binToInt(binPhraseWTChecksum)
+    print('\n Int_phrase: ')
+    print(int_phrase)
+
+    bytes_phrase = bytes([i for i in int_phrase])
+    print('\n bytes_phrase: ')
+    print(bytes_phrase)
+
+    hashed_bytesPhrase = hashlib.sha256(bytes_phrase).hexdigest()
+    print('\n hashed_bytesPhrase: ')
+    print(hashed_bytesPhrase)
+
+    checksum = bin(int(hashed_bytesPhrase, 16))[2:].zfill(128)[:4]
+    print('\nChecksum de la seed entrée : ' + phraseChecksum + '| Checksum calculé : '+ checksum)
+    message = 'Le checksum est valide' if checksum == phraseChecksum else 'Le checksum ne correspond pas'
+    print(message)
 
 # Main
 
@@ -52,19 +90,10 @@ print(intPhrase)
 
 binPhrase = intToBin(intPhrase)
 print('\nBinary Phrase :\n'+str(binPhrase))
-print('\nlen binPhrase = '+str(len(binPhrase)))
+print('len binPhrase = '+str(len(binPhrase)))
 
-### To check if we get the same word list as entered
+### Show the 12 words, To check if we get the same word list as entered
 # verifyWords = verifyBinOutput(binPhrase, index_list)
 # print('\nVerified word list : \n'+ " ".join(verifyWords))
-
-def verifyChecksum(binPhrase):
-    phraseChecksum = binPhrase[-4:]
-    binPhraseWTChecksum = binPhrase[:-4]
-    bytesPhrase = bytes([int(i, 16) for i in binPhraseWTChecksum])
-    hashed_bytesPhrase = hashlib.sha256(bytesPhrase).hexdigest()
-    print(hashed_bytesPhrase)
-    checksum = bin(int(hashed_bytesPhrase, 16))[2:].zfill(128)[:4]
-    print(checksum, phraseChecksum)
 
 verifyChecksum(binPhrase)
