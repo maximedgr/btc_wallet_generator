@@ -1,85 +1,76 @@
-import secrets
-import hashlib
-import sys
+import binascii
+import secrets, hashlib
+from turtle import right
 
+BITS = 128
 
-### FONCTIONS
+####### Functions
 
+#Extraction des mots pour la phrase mnemonic - BIP39
+def getFileWords():
+    index_list = []
+    with open("bip-39Words.txt", "r", encoding='utf-8') as file:
+        for word in file.readlines():
+            index_list.append(word.strip())
+    return index_list
 
-def padd_binary(bin_str: str, size: int) -> str:
-    """
-    Pads a binary string with zeros to the left
-    :param bin_str: binary string to pad
-    :param size: size of the padded string
-    :return: padded binary string
-    """
-    for _ in range(size - len(bin_str)):
-        bin_str = '0' + bin_str
-    return bin_str
-
-def byte_to_binary(b: bytes, size: int) -> str:
-    """
-    Converts a byte to a binary string
-    :param byte: byte to convert
-    :param size: size of the binary string
-    :return: binary string
-    """
-    order = -1 if sys.byteorder == 'little' else 1
-    bin_n = bin(int.from_bytes(b, byteorder='big'))[2:]
-    return padd_binary(bin_n, size)
-
-def getSlice(seedC):
-    slicedTab = []
-    pointertab =0
-    for i in range(0, 12):
-        
-        slicedTab.append(seedC[pointertab:pointertab+11])
-        pointertab+=11
-
-    return slicedTab
-
-def SeedToMnemonic(seedChecksum):
-    tab = getSlice(seedChecksum)
-    # print('\n Lots de 11 bits')
-    # print(tab)
-    intTab = []
-    for cell in tab:
-        intTab.append(int(cell, 2))
-    
+#Génération de la phrase mnemonic
+def getMnemonicPhrase(bin_result, index_list):
     wordlist = []
-    data = []
-    file = open("bip-39Words.txt", "r")
-    for line in file:
-        stripped_line = line.strip()
-        line_list = stripped_line.split()
-        data.append(line_list[0])
-
-    for cell in intTab:
-          
-        word = data[cell+1]
-        wordlist.append(word)     
-        
+    for i in range(len(bin_result) // 11):
+        index = int(bin_result[i*11 : (i+1)*11], 2)
+        wordlist.append(index_list[index])
     return wordlist
 
-### MAIN
+#Génération de la master private key - BIP43/44
+def master_private(root_seed_bytes):
+    hmac_seed_out=bin(int(hashlib.sha512(root_seed_bytes).hexdigest(),16))
+    print(len(hmac_seed_out))
+    left_root=hmac_seed_out[2:258].zfill(256)
+    master_chain_code=hmac_seed_out[258:].zfill(256)
+    return left_root,master_chain_code
 
-entropy_bytes = secrets.token_bytes(16)
-print(entropy_bytes)
-entropy = byte_to_binary(entropy_bytes, 128)
-print(entropy)
-print('\n')
+####### Main
 
-hash = hashlib.sha256(entropy_bytes).digest()
-entropy_hash = byte_to_binary(hash, 256)
-# print(entropy_hash)
-seedChecksum = entropy + entropy_hash[:4]
+def main():
 
-print('Liste de mots : ')
-worldList = SeedToMnemonic(seedChecksum)
-print(worldList)
+    #Génération de generated entropie et du hash associé    
+    print("###### Génération d'un wallet BTC : ######\n\n")
+    entropy_bytes = secrets.token_bytes(16)
+    print('Entropy: '+ str(entropy_bytes))
+    hex_entropy = entropy_bytes.hex()
+    print("\nHex_entropy : \n" + hex_entropy)
 
-for i in worldList:
-    print(i, end=' ')
+    #Hash via SHA256 de l'entropie
+    hashed_entropy = hashlib.sha256(entropy_bytes).hexdigest()
+    print("\nHashed_entropy : \n" + hashed_entropy)
+    print('\n')
 
+    #Conversion en binaire et ajout checksum à l'entropie
+    bin_result = (
+        bin(int(hex_entropy, 16))[2:].zfill(BITS)
+        + bin(int(hashed_entropy, 16))[2:].zfill(BITS)[:4]
+    )
+    print('\nBin result: ' + str(bin_result))
 
+    #Création de la phrase mnémonic associée à la seed
+    index_list = getFileWords()
+    wordlist = getMnemonicPhrase(bin_result, index_list)
+
+    phrase = " ".join(wordlist) 
+    print("Mnemonic seed phrase :",end='')
+    print(phrase)
+
+    #Master key et Chain Code
+    a,b = master_private(bytes([int(i) for i in bin_result]))
+    print("\nMaster Private key : ",end='')
+    print(hex(int(a)))
+    print("\nMaster Chain Code : ",end='')
+    print(hex(int(b)))
+
+    #Fin
+
+if __name__== "__main__":
+    main()
+    print("\n###### End ######\n")
 
