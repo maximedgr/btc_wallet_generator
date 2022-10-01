@@ -14,8 +14,7 @@ python3 main.py
 
 Let yourself be guided by the interactive menu by entering your choices directly into the console.
 
-
-###⚠️ Disclaimer ⚠️
+### ⚠️ Disclaimer ⚠️
 
 This project has not been verified/audited, please use it for research purposes only.
 Protect your keys, never share them.
