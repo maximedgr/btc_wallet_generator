@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 import binascii
+import hashlib
+import base58
+import codecs
+import ecdsa
 import secrets, hashlib
 from turtle import right
 
@@ -31,6 +35,8 @@ def master_private(root_seed_bytes):
     print(len(hmac_seed_out))
     left_root=hmac_seed_out[2:258].zfill(256)
     master_chain_code=hmac_seed_out[258:].zfill(256)
+    print(type(left_root))
+    print(type(master_chain_code))
     return left_root,master_chain_code
 
 def generate_wallet():
@@ -63,11 +69,29 @@ def generate_wallet():
     print(phrase)
 
     #Master key et Chain Code
-    a,b = master_private(bytes([int(i) for i in bin_result]))
+    m_private_k,chain_code = master_private(bytes([int(i) for i in bin_result]))
     print("\nMaster Private key : ",end='')
-    print(hex(int(a)))
+    print(hex(int(m_private_k)))
     print("\nMaster Chain Code : ",end='')
-    print(hex(int(b)))
+    print(hex(int(chain_code)))
+
+    ### Master public key
+
+    # Hex decoding the private key to bytes using codecs library
+    private_key_bytes = codecs.decode(m_private_k, 'hex')
+    print("\n\n")
+    print(private_key_bytes)
+    print("\n")
+    # Generating a public key in bytes using SECP256k1 & ecdsa library
+    public_key_raw = ecdsa.SigningKey.from_string(private_key_bytes, curve=ecdsa.SECP256k1).verifying_key
+    public_key_bytes = public_key_raw.to_string()
+    # Hex encoding the public key from bytes
+    public_key_hex = codecs.encode(public_key_bytes, 'hex')
+    # Bitcoin public key begins with bytes 0x04 so we have to add the bytes at the start
+    public_key = (b'04' + public_key_hex).decode("utf-8")
+    print("\nMaster Public Key : ",end='')
+    print(public_key)
+
 
     #Fin
 
