@@ -1,5 +1,5 @@
 ### BTC Wallet Generator
-### by Maxime D. - Thomas F | ESILV FinTech - Blockchain Programming
+### by Maxime D. - Thomas F.  | ESILV FinTech - Blockchain Programming
 
 ### Setup
 
