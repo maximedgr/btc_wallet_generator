@@ -1,6 +1,9 @@
+#!/usr/bin/env python3
 import binascii
 import secrets, hashlib
 from turtle import right
+
+import verifyPhrase
 
 BITS = 128
 
@@ -30,9 +33,7 @@ def master_private(root_seed_bytes):
     master_chain_code=hmac_seed_out[258:].zfill(256)
     return left_root,master_chain_code
 
-####### Main
-
-def main():
+def generate_wallet():
 
     #Génération de generated entropie et du hash associé    
     print("###### Génération d'un wallet BTC : ######\n\n")
@@ -58,7 +59,7 @@ def main():
     wordlist = getMnemonicPhrase(bin_result, index_list)
 
     phrase = " ".join(wordlist) 
-    print("Mnemonic seed phrase :",end='')
+    print("Mnemonic seed phrase :  ",end='')
     print(phrase)
 
     #Master key et Chain Code
@@ -70,7 +71,59 @@ def main():
 
     #Fin
 
-if __name__== "__main__":
-    main()
-    print("\n###### End ######\n")
+
+##### Menu
+
+menu_options = {
+    1: 'Generate BTC wallet',
+    2: 'Verify Seed',
+    3: '?',
+    4: 'Exit',
+}
+
+def print_menu():
+    print("\n\n#########\n")
+    for key in menu_options.keys():
+        print (key, '--', menu_options[key] )
+
+def option1():
+     print('Handle option : \'Generate BTC wallet\'')
+     generate_wallet()
+
+def option2():
+     print('Handle option : \'Verify Seed\'')
+     verifyPhrase.verify_seed()
+
+def option3():
+     print('Handle option : \'Option 3\'')
+
+##### Main
+
+if __name__=='__main__':
+    print("\n\nBTC Wallet Managment MENU :")
+    looping=True
+    while(looping):
+        print_menu()
+        option = ''
+        try:
+            option = int(input('\nEnter your choice: '))
+        except:
+            print('Wrong input. Please enter a number ...')
+        #Check what choice was entered and act accordingly
+        if option == 1:
+           option1()
+        elif option == 2:
+            option2()
+        elif option == 3:
+            option3()
+        elif option == 4:
+            print('\nEnd...\n')
+            looping=False
+            exit()
+        else:
+            print('Invalid option. Please enter a number between 1 and 4.')
+
+
+
+
 

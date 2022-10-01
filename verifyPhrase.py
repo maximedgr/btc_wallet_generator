@@ -1,7 +1,7 @@
 import secrets, hashlib, binascii
 
+####### Functions
 
-# Functions
 # Get the words from the bip39 file in a list
 def getFileWords():
     index_list = []
@@ -62,38 +62,40 @@ def verifyChecksum(binPhrase):
 
     binPhraseWTChecksum = binPhrase[:-4]
     int_phrase = binToInt(binPhraseWTChecksum)
-    print('\n Int_phrase: ')
+    print('\nInt_phrase: ')
     print(int_phrase)
 
     bytes_phrase = bytes([i for i in int_phrase])
-    print('\n bytes_phrase: ')
+    print('\nBytes_phrase: ')
     print(bytes_phrase)
 
     hashed_bytesPhrase = hashlib.sha256(bytes_phrase).hexdigest()
-    print('\n hashed_bytesPhrase: ')
+    print('\nHashed_bytesPhrase: ')
     print(hashed_bytesPhrase)
 
     checksum = bin(int(hashed_bytesPhrase, 16))[2:].zfill(128)[:4]
-    print('\nChecksum de la seed entrée : ' + phraseChecksum + '| Checksum calculé : '+ checksum)
-    message = 'Le checksum est valide' if checksum == phraseChecksum else 'Le checksum ne correspond pas'
+    print('\nChecksum de la seed entrée : ' + phraseChecksum + ' | Checksum calculé : '+ checksum)
+    message = 'Le checksum est VALIDE' if checksum == phraseChecksum else 'Le checksum ne correspond pas'
     print(message)
 
-# Main
+####### Main
 
-phrase = input("Please type your 12 words passPhrase : ")
+def verify_seed():
 
+    phrase = input("Please type your 12 words passPhrase : ")
 
-index_list = getFileWords()
-intPhrase = wordToInt(phrase, index_list)
-print('\nInt phrase :')
-print(intPhrase)
+    index_list = getFileWords()
+    intPhrase = wordToInt(phrase, index_list)
+    print('\nInt phrase : ')
+    print(intPhrase)
 
-binPhrase = intToBin(intPhrase)
-print('\nBinary Phrase :\n'+str(binPhrase))
-print('len binPhrase = '+str(len(binPhrase)))
+    binPhrase = intToBin(intPhrase)
+    print('\nBinary Phrase : \n'+str(binPhrase))
+    #print('len binPhrase = '+str(len(binPhrase)))
 
-### Show the 12 words, To check if we get the same word list as entered
-# verifyWords = verifyBinOutput(binPhrase, index_list)
-# print('\nVerified word list : \n'+ " ".join(verifyWords))
+    ### Show the 12 words, To check if we get the same word list as entered
+    # verifyWords = verifyBinOutput(binPhrase, index_list)
+    # print('\nVerified word list : \n'+ " ".join(verifyWords))
 
-verifyChecksum(binPhrase)
+    verifyChecksum(binPhrase)
+
