@@ -63,11 +63,12 @@ def SeedToMnemonic(seedChecksum):
 
 ### MAIN
 
-entropy_bytes = secrets.token_bytes(128)
-# print(entropy_bytes)
+entropy_bytes = secrets.token_bytes(16)
+print(entropy_bytes)
 entropy = byte_to_binary(entropy_bytes, 128)
-# print(entropy)
-# print('\n')
+print(entropy)
+print('\n')
+
 hash = hashlib.sha256(entropy_bytes).digest()
 entropy_hash = byte_to_binary(hash, 256)
 # print(entropy_hash)
