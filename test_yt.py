@@ -4,41 +4,46 @@ from turtle import right
 
 BITS = 128
 
+# Functions
+
+def getFileWords():
+    index_list = []
+    with open("bip-39Words.txt", "r", encoding='utf-8') as file:
+        for word in file.readlines():
+            index_list.append(word.strip())
+    return index_list
+
+def getMnemonicPhrase(bin_result, index_list):
+    wordlist = []
+    for i in range(len(bin_result) // 11):
+
+        index = int(bin_result[i*11 : (i+1)*11], 2)
+        wordlist.append(index_list[index])
+    return wordlist
 
 # Main
 
 
 entropy_bytes = secrets.token_bytes(16)
-
+print('entropy: '+ str(entropy_bytes))
 hex_entropy = entropy_bytes.hex()
 print("\nHex_entropy : \n" + hex_entropy)
 
 hashed_entropy = hashlib.sha256(entropy_bytes).hexdigest()
 print("\nHashed_entropy : \n" + hashed_entropy)
 
-entropy_length = len(entropy_bytes)
-print(entropy_length)
 print('\n')
 
 bin_result = (
-    bin(int(hex_entropy, 16))[2:].zfill(128)
-    + bin(int(hashed_entropy, 16))[2:].zfill(128)[:4]
+    bin(int(hex_entropy, 16))[2:].zfill(BITS)
+    + bin(int(hashed_entropy, 16))[2:].zfill(BITS)[:4]
 )
 
 print('\nBin result: ' + str(bin_result))
 print(len(bin_result))
 
-index_list = []
-with open("bip-39Words.txt", "r", encoding='utf-8') as file:
-    for word in file.readlines():
-        index_list.append(word.strip())
-
-
-wordlist = []
-for i in range(len(bin_result) // 11):
-
-    index = int(bin_result[i*11 : (i+1)*11], 2)
-    wordlist.append(index_list[index])
+index_list = getFileWords()
+wordlist = getMnemonicPhrase(bin_result, index_list)
 
 print(len(wordlist))
 phrase = " ".join(wordlist) 
