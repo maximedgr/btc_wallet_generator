@@ -4,7 +4,7 @@ import hashlib
 import codecs
 from ecdsa import ECDH, SECP256k1, SigningKey, VerifyingKey
 import secrets, hashlib
-
+import derivation
 import verifyPhrase
 
 BITS = 128
@@ -49,19 +49,32 @@ def get_public_key(private_key: bytes):
     public_key: VerifyingKey = ecdh.get_public_key()
     return public_key.to_string()
 
+def wallet_info(seed):
+    print("\n#########")
+    m_private_k, m_public_k, chain_code = master_chaincode(seed)
+    print("\nMaster Private key : ",end='')
+    print(m_private_k.hex())
+    print("\nMaster Chain Code : ",end='')
+    print(chain_code.hex())
+    print("\nMaster Public Key : ",end='')
+    print(m_public_k.hex())
+    print("\n#########")
+    return m_private_k, m_public_k, chain_code
+
+
 def generate_wallet():
 
     #Génération de generated entropie et du hash associé    
     print("###### Génération d'un wallet BTC : ######\n\n")
     entropy_bytes = secrets.token_bytes(16)
-    print('Entropy: '+ str(entropy_bytes))
+    #print('Entropy: '+ str(entropy_bytes))
     hex_entropy = entropy_bytes.hex()
-    print("\nHex_entropy : \n" + hex_entropy)
+    #print("\nHex_entropy : \n" + hex_entropy)
 
     #Hash via SHA256 de l'entropie
     hashed_entropy = hashlib.sha256(entropy_bytes).hexdigest()
-    print("\nHashed_entropy : \n" + hashed_entropy)
-    print('\n')
+    #print("\nHashed_entropy : \n" + hashed_entropy)
+    #print('\n')
 
     #Conversion en binaire et ajout checksum à l'entropie
     withoutChecksum = bin(int(hex_entropy, 16))[2:].zfill(BITS)
@@ -69,7 +82,7 @@ def generate_wallet():
         withoutChecksum
         + bin(int(hashed_entropy, 16))[2:].zfill(BITS)[:4]
     )
-    print('\nBin result: ' + str(bin_result))
+    #print('\nBin result: ' + str(bin_result))
 
     #Création de la phrase mnémonic associée à la seed
     index_list = getFileWords()
@@ -78,18 +91,9 @@ def generate_wallet():
     phrase = " ".join(wordlist) 
     print("Mnemonic seed phrase :  ",end='')
     print(phrase)
-
     #Master keys et Chain Code
-    m_private_k, m_public_k, chain_code = master_chaincode(withoutChecksum)
-    print("\nMaster Private key : ",end='')
-    print(m_private_k.hex())
-    print(len(m_private_k.hex()))
-    print("\nMaster Chain Code : ",end='')
-    print(chain_code.hex())
-    print(len(chain_code.hex()))
-    print("\nMaster Public Key : ",end='')
-    print(m_public_k.hex())
-    print(len(m_public_k.hex()))
+    wallet_info(withoutChecksum)
+
 
     #Fin
 
@@ -99,7 +103,7 @@ def generate_wallet():
 menu_options = {
     1: 'Generate BTC wallet',
     2: 'Verify Seed',
-    3: '?',
+    3: 'Get child address with derivation path',
     4: 'Exit',
 }
 
@@ -117,7 +121,8 @@ def option2():
      verifyPhrase.verify_seed()
 
 def option3():
-     print('Handle option : \'Option 3\'')
+     print('Handle option : \'Get child address with derivation path\'')
+     derivation.derivate_key()
 
 ##### Main
 

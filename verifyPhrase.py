@@ -1,5 +1,5 @@
 import secrets, hashlib, binascii
-
+import main
 ####### Functions
 
 # Get the words from the bip39 file in a list
@@ -27,14 +27,12 @@ def intToBin(intPhrase):
     binPhrase = ''
     for n in intPhrase:
         binPhrase += str(bin(n)[2:].zfill(11))
-
     return binPhrase
 
 
 # To check if we get the same word list as entered
 def verifyBinOutput(bin_result, index_list):
     wordlist = []
-  
     bin_result = str(bin_result)
     for i in range(len(bin_result) // 11):
         index = [i*11, (i+1)*11]
@@ -48,7 +46,7 @@ def verifyBinOutput(bin_result, index_list):
 # then get the last 4 bits (checksum) and compare with the phraseChecksum value
 def verifyChecksum(binPhrase):
     phraseChecksum = binPhrase[-4:]
-
+    
     binPhraseWTChecksum = binPhrase[:-4]
     bytes_phrase = int(binPhraseWTChecksum, 2).to_bytes(len(binPhraseWTChecksum) // 8, byteorder='big')
     print('\nBytes_phrase: ')
@@ -62,6 +60,8 @@ def verifyChecksum(binPhrase):
     print('\nPassPhrase Checksum : ' + phraseChecksum + ' | Processed Checksum : '+ checksum)
     message = 'The Checksum is valid' if checksum == phraseChecksum else 'ERROR : The Checksum is invalid'
     print(message)
+    return binPhraseWTChecksum
+
 
 ####### Main
 
@@ -71,6 +71,7 @@ def verify_seed():
 
     index_list = getFileWords()
     intPhrase = wordToInt(phrase, index_list)
+    print("\nWallet infos : ")
     print('\nInt phrase : ')
     print(intPhrase)
 
@@ -82,4 +83,8 @@ def verify_seed():
     # verifyWords = verifyBinOutput(binPhrase, index_list)
     # print('\nVerified word list : \n'+ " ".join(verifyWords))
 
-    verifyChecksum(binPhrase)
+    # verifyChecksum(binPhrase)
+    
+    main.wallet_info(verifyChecksum(binPhrase))
+
+    
