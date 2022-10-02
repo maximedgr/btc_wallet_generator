@@ -31,9 +31,11 @@ BTC Wallet Managment MENU :
 4 -- Exit
 ````
 
-The first option allows you to generate a bitcoin wallet: master public key, master private key.
+The first option allows you to generate a bitcoin wallet: master public key, master private key. (BIP39)
+
 The second option allows you to verify the integrity of your seed.
-The third option allows you to generate child addresses from your seed and master public key by specifing the derivation path.
+
+The third option allows you to generate child addresses from your seed and master public key by specifing the derivation path. (BIP32)
 
 
 ### ⚠️ Disclaimer ⚠️
