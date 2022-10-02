@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 import binascii
 import hashlib
-import base58
 import codecs
-import ecdsa
+from ecdsa import ECDH, SECP256k1, SigningKey, VerifyingKey
 import secrets, hashlib
-from turtle import right
 
 import verifyPhrase
 
@@ -29,15 +27,27 @@ def getMnemonicPhrase(bin_result, index_list):
         wordlist.append(index_list[index])
     return wordlist
 
+def from_bitstring_to_byte(bitstring, size=32):
+    number = int(bitstring, 2)
+    return number.to_bytes(size, byteorder='big')
+
 #Génération de la master private key - BIP43/44
-def master_private(root_seed_bytes):
-    hmac_seed_out=bin(int(hashlib.sha512(root_seed_bytes).hexdigest(),16))
-    print(len(hmac_seed_out))
-    left_root=hmac_seed_out[2:258].zfill(256)
-    master_chain_code=hmac_seed_out[258:].zfill(256)
-    print(type(left_root))
-    print(type(master_chain_code))
-    return left_root,master_chain_code
+def master_chaincode(bin_seed):
+    seed = from_bitstring_to_byte(bin_seed, 16)
+
+    # Get master private key and chaincode
+    sha = hashlib.sha512(seed).digest()
+    private_key = sha[:32]
+    chain_code = sha[32:]
+    # Get master public key
+    public_key = get_public_key(private_key)
+    return private_key, public_key, chain_code
+
+def get_public_key(private_key: bytes):
+    signing_key = SigningKey.from_string(private_key, curve=SECP256k1, hashfunc=hashlib.sha256)
+    ecdh = ECDH(curve = SECP256k1, private_key=signing_key)
+    public_key: VerifyingKey = ecdh.get_public_key()
+    return public_key.to_string()
 
 def generate_wallet():
 
@@ -54,8 +64,9 @@ def generate_wallet():
     print('\n')
 
     #Conversion en binaire et ajout checksum à l'entropie
+    withoutChecksum = bin(int(hex_entropy, 16))[2:].zfill(BITS)
     bin_result = (
-        bin(int(hex_entropy, 16))[2:].zfill(BITS)
+        withoutChecksum
         + bin(int(hashed_entropy, 16))[2:].zfill(BITS)[:4]
     )
     print('\nBin result: ' + str(bin_result))
@@ -68,30 +79,17 @@ def generate_wallet():
     print("Mnemonic seed phrase :  ",end='')
     print(phrase)
 
-    #Master key et Chain Code
-    m_private_k,chain_code = master_private(bytes([int(i) for i in bin_result]))
+    #Master keys et Chain Code
+    m_private_k, m_public_k, chain_code = master_chaincode(withoutChecksum)
     print("\nMaster Private key : ",end='')
-    print(hex(int(m_private_k)))
+    print(m_private_k.hex())
+    print(len(m_private_k.hex()))
     print("\nMaster Chain Code : ",end='')
-    print(hex(int(chain_code)))
-
-    ### Master public key
-
-    # Hex decoding the private key to bytes using codecs library
-    private_key_bytes = codecs.decode(m_private_k, 'hex')
-    print("\n\n")
-    print(private_key_bytes)
-    print("\n")
-    # Generating a public key in bytes using SECP256k1 & ecdsa library
-    public_key_raw = ecdsa.SigningKey.from_string(private_key_bytes, curve=ecdsa.SECP256k1).verifying_key
-    public_key_bytes = public_key_raw.to_string()
-    # Hex encoding the public key from bytes
-    public_key_hex = codecs.encode(public_key_bytes, 'hex')
-    # Bitcoin public key begins with bytes 0x04 so we have to add the bytes at the start
-    public_key = (b'04' + public_key_hex).decode("utf-8")
+    print(chain_code.hex())
+    print(len(chain_code.hex()))
     print("\nMaster Public Key : ",end='')
-    print(public_key)
-
+    print(m_public_k.hex())
+    print(len(m_public_k.hex()))
 
     #Fin
 
