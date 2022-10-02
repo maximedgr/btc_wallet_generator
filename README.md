@@ -10,6 +10,11 @@
 python3 main.py
 ```
 
+Modules may not be installed on your computer. Use the pip package handler through the command prompt.
+```shell
+python -m pip install [package]
+````
+
 ### How to use
 
 Let yourself be guided by the interactive menu by entering your choices directly into the console.
