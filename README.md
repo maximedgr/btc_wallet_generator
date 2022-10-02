@@ -7,6 +7,7 @@
 2. Install python3
 3. Launch main program
 ```shell
+python -m pip ecdsa
 python3 main.py
 ```
 
