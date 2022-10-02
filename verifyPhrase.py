@@ -42,30 +42,15 @@ def verifyBinOutput(bin_result, index_list):
         wordlist.append(index_list[wordInt])
     return wordlist
 
-# Split the binary phrase into a list of 8 bits numbers, then transform numbers into integers
-def binToInt(binPhraseWTChecksum):
-    intPhrase = []
-    for i in range(len(binPhraseWTChecksum) // 8):
-        index = [i*8, (i+1)*8]
-        fourBits = binPhraseWTChecksum[index[0] : index[1]]
-        intPhrase.append(int(fourBits, 2))
-    
-    return intPhrase
-
 # Get the binary phrase, then take the 128 first bits,
-# then call the above binToInt function,
-# then transform the integers into bytes,
+# then transform each 8 bits long parts into bytes,
 # then hash the bytes,
 # then get the last 4 bits (checksum) and compare with the phraseChecksum value
 def verifyChecksum(binPhrase):
     phraseChecksum = binPhrase[-4:]
 
     binPhraseWTChecksum = binPhrase[:-4]
-    int_phrase = binToInt(binPhraseWTChecksum)
-    print('\nInt_phrase: ')
-    print(int_phrase)
-
-    bytes_phrase = bytes([i for i in int_phrase])
+    bytes_phrase = int(binPhraseWTChecksum, 2).to_bytes(len(binPhraseWTChecksum) // 8, byteorder='big')
     print('\nBytes_phrase: ')
     print(bytes_phrase)
 
@@ -74,8 +59,8 @@ def verifyChecksum(binPhrase):
     print(hashed_bytesPhrase)
 
     checksum = bin(int(hashed_bytesPhrase, 16))[2:].zfill(128)[:4]
-    print('\nChecksum de la seed entrée : ' + phraseChecksum + ' | Checksum calculé : '+ checksum)
-    message = 'Le checksum est VALIDE' if checksum == phraseChecksum else 'Le checksum ne correspond pas'
+    print('\nPassPhrase Checksum : ' + phraseChecksum + ' | Processed Checksum : '+ checksum)
+    message = 'The Checksum is valid' if checksum == phraseChecksum else 'ERROR : The Checksum is invalid'
     print(message)
 
 ####### Main
@@ -98,4 +83,3 @@ def verify_seed():
     # print('\nVerified word list : \n'+ " ".join(verifyWords))
 
     verifyChecksum(binPhrase)
-
