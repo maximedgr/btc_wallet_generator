@@ -4,7 +4,7 @@ import hashlib
 import codecs
 from ecdsa import ECDH, SECP256k1, SigningKey, VerifyingKey
 import secrets, hashlib
-
+import derivation
 import verifyPhrase
 
 BITS = 128
@@ -59,6 +59,7 @@ def wallet_info(seed):
     print("\nMaster Public Key : ",end='')
     print(m_public_k.hex())
     print("\n#########")
+    return m_private_k, m_public_k, chain_code
 
 
 def generate_wallet():
@@ -102,7 +103,7 @@ def generate_wallet():
 menu_options = {
     1: 'Generate BTC wallet',
     2: 'Verify Seed',
-    3: '?',
+    3: 'Get child address with derivation path',
     4: 'Exit',
 }
 
@@ -120,7 +121,8 @@ def option2():
      verifyPhrase.verify_seed()
 
 def option3():
-     print('Handle option : \'Option 3\'')
+     print('Handle option : \'Get child address with derivation path\'')
+     derivation.derivate_key()
 
 ##### Main
 

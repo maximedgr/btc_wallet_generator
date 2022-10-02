@@ -27,14 +27,12 @@ def intToBin(intPhrase):
     binPhrase = ''
     for n in intPhrase:
         binPhrase += str(bin(n)[2:].zfill(11))
-
     return binPhrase
 
 
 # To check if we get the same word list as entered
 def verifyBinOutput(bin_result, index_list):
     wordlist = []
-  
     bin_result = str(bin_result)
     for i in range(len(bin_result) // 11):
         index = [i*11, (i+1)*11]
@@ -63,6 +61,7 @@ def verifyChecksum(binPhrase):
     message = 'The Checksum is valid' if checksum == phraseChecksum else 'ERROR : The Checksum is invalid'
     print(message)
     return binPhraseWTChecksum
+
 
 ####### Main
 
